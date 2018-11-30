@@ -2,6 +2,8 @@
 
 Elliptic Curve Cryptography in Julia
 
+[![pipeline status](https://gitlab.com/braneproject/ecc.jl/badges/master/pipeline.svg)](https://gitlab.com/braneproject/ecc.jl/commits/master)  [![coverage report](https://gitlab.com/braneproject/ecc.jl/badges/master/coverage.svg)](https://gitlab.com/braneproject/ecc.jl/commits/master)
+
 ## Types
 
 S256Point(𝑥::T, 𝑦::T) where {T<:Union{S256FieldElement, Integer, Infinity}}
