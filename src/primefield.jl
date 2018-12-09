@@ -19,12 +19,15 @@
 
 abstract type PrimeField <: Number end
 
-infield(x::Number,y::Number) = x >= 0 && x < y
+infield(x::Unsigned,y::Unsigned) = x < y
+infield(x::Integer,y::Integer) = x >= 0 && x < y
+function -(x::UInt,y::UInt) = x > y ? x - y : y - x + 1 end
 
 "Represents FieldElement type in which 𝑛 ∈ 𝐹𝑝 and 𝑝 ∈ ℙ"
 struct FieldElement <: PrimeField
     𝑛::Integer
     𝑝::Integer
+    # FieldElement(𝑛::Signed,𝑝::Signed) = new(UInt(𝑛),UInt(𝑝))
     FieldElement(𝑛,𝑝) = !infield(𝑛,𝑝) ? throw(DomainError("𝑛 is not in field range")) : new(𝑛,𝑝)
 end
 
@@ -53,7 +56,11 @@ function -(𝑋₁::PrimeField,𝑋₂::PrimeField)
     if 𝑋₁.𝑝 != 𝑋₂.𝑝
         throw(DomainError("Cannot operate on two numbers in different Fields"))
     else
-        𝑛 = mod(𝑋₁.𝑛 - 𝑋₂.𝑛, 𝑋₁.𝑝)
+        # if 𝑋₁.𝑛 > 𝑋₂.𝑛
+            𝑛 = mod(𝑋₁.𝑛 - 𝑋₂.𝑛, 𝑋₁.𝑝)
+        # else
+            # 𝑛 = mod(𝑋₂.𝑛 - 𝑋₁.𝑛 + 1, 𝑋₁.𝑝)
+        # end
         return typeof(𝑋₁)(𝑛, 𝑋₁.𝑝)
     end
 end
