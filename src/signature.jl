@@ -23,8 +23,8 @@ Signature(𝑟, 𝑠) represents a Signature for 𝑧 in which
 𝑘 being a random integer.
 """
 struct Signature
-    𝑟::BigInt
-    𝑠::BigInt
+    𝑟::UInt256
+    𝑠::UInt256
     Signature(𝑟, 𝑠) = new(𝑟, 𝑠)
 end
 
@@ -41,17 +41,13 @@ Serialize a Signature to DER format
 sig2der(x::Signature) -> Array{UInt8,1}
 """
 function sig2der(x::Signature)
-    rbin = int2bytes(x.𝑟)
-    # if rbin has a high bit, add a 00
-    # if rbin[1] >= 128
-    #     rbin = pushfirst!(rbin, 0x00)
-    # end
-    result = cat([0x02], int2bytes(length(rbin)), rbin; dims=1)
-    sbin = int2bytes(x.𝑠)
-    # if sbin has a high bit, add a 00
-    # if sbin[1] >= 128
-    #     sbin = pushfirst!(sbin, 0x00)
-    # end
+    rbin = reinterpret(UInt8, [hton(x.𝑟)])
+    i = findfirst(x -> x != 0x00, rbin)
+    rbin = rbin[i:end]
+    result = cat([0x02], UInt8[length(rbin)], rbin; dims=1)
+    sbin = reinterpret(UInt8, [hton(x.𝑠)])
+    i = findfirst(x -> x != 0x00, sbin)
+    sbin = sbin[i:end]
     result = cat(result, [0x02], int2bytes(length(rbin)), sbin; dims=1)
     return cat([0x30], int2bytes(length(result)), result; dims=1)
 end
@@ -91,6 +87,6 @@ function der2sig(signature_bin::AbstractArray{UInt8})
     if length(signature_bin) != 6 + rlength + slength
         throw(DomainError("Signature too long"))
     end
-    return Signature(parse(BigInt, r, base=16),
-                     parse(BigInt, s, base=16))
+    return Signature(parse(UInt256, r, base=16),
+                     parse(UInt256, s, base=16))
 end

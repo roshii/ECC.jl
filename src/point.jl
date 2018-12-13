@@ -87,11 +87,11 @@ function +(𝑃::AbstractPoint,𝑄::AbstractPoint)
 
     # Case 1
     elseif 𝑃.𝑥 != 𝑄.𝑥
-        λ = (𝑄.𝑦 - 𝑃.𝑦) / (𝑄.𝑥 - 𝑃.𝑥)
+        λ = (𝑄.𝑦 - 𝑃.𝑦) ÷ (𝑄.𝑥 - 𝑃.𝑥)
         𝑥 = λ^2 - 𝑃.𝑥 - 𝑄.𝑥
     # Case 2
     else
-        λ = (3 * 𝑃.𝑥^2 + 𝑃.𝑎) / (2 * 𝑃.𝑦)
+        λ = (3 * 𝑃.𝑥^2 + 𝑃.𝑎) ÷ (2 * 𝑃.𝑦)
         𝑥 = λ^2 - 2 * 𝑃.𝑥
     end
     𝑦 = λ * (𝑃.𝑥 - 𝑥) - 𝑃.𝑦

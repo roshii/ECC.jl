@@ -17,7 +17,7 @@
     along with ECC.jl.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-using ECC, Test
+using BitIntegers, ECC, Test
 
 tests = ["helper", "primefield", "infinity", "point", "ecc"]
 

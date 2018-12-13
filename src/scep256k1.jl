@@ -18,15 +18,15 @@
 """
 
 # scep256k1 constants
-A = 0
-B = 7
-P = big(2)^256 - 2^32 - 977
-N = big"0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141"
+A = UInt256(0)
+B = UInt256(7)
+P = UInt256(2)^256 - UInt256(2)^32 - 977
+N = parse(UInt256,"fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141",base=16)
 
 "Element in an scep256k1 field"
 struct S256Element <: PrimeField
-     𝑛::BigInt
-     𝑝::BigInt
+     𝑛::UInt256
+     𝑝::UInt256
      S256Element(𝑛,𝑝=P) = !infield(𝑛,𝑝) ? throw(DomainError("𝑛 is not in field range")) : new(𝑛,𝑝)
 end
 
@@ -61,7 +61,7 @@ end
 
 S256Point(::Infinity,::Infinity) = S256Point{Infinity}(∞,∞)
 S256Point(𝑥::S256Element,𝑦::S256Element) = !iselliptic(𝑥,𝑦,A,B) ? throw(DomainError("Point is not on curve")) : S256Point{S256Element}(𝑥,𝑦)
-S256Point(x::Integer,y::Integer) = S256Point{S256Element}(S256Element(big(x)),S256Element(big(y)))
+S256Point(x::Integer,y::Integer) = S256Point{S256Element}(S256Element(UInt256(x)),S256Element(UInt256(y)))
 
 "Formats S256Point as (𝑥, 𝑦) in hexadecimal format"
 function show(io::IO, z::S256Point)
@@ -79,7 +79,7 @@ end
 "Scalar multiplication of an S256Point"
 function *(λ::Integer,𝑃::S256Point)
     𝑅 = S256Point(∞, ∞)
-    λ =  mod(λ, N)
+    λ =  mod(UInt256(λ), N)
     while λ > 0
         if λ & 1 != 0
             𝑅 += 𝑃
@@ -97,15 +97,19 @@ as second argument.
 'point2sec(P::T, compressed::Bool=true) where {T<:S256Point} -> Array{UInt8,1}'
 """
 function point2sec(P::T, compressed::Bool=true) where {T<:S256Point}
+    xbin = reinterpret(UInt8, [hton(P.𝑥.𝑛)])
+    i = findfirst(x -> x != 0x00, xbin)
     if compressed
         if mod(P.𝑦.𝑛, 2) == 0
-            indice = 0x02
+            prefix = 0x02
         else
-            indice = 0x03
+            prefix = 0x03
         end
-        return cat(indice,hex2bytes(string(P.𝑥.𝑛, base=16));dims=1)
+        return cat(prefix,xbin[i:end];dims=1)
     else
-        return cat(0x04,hex2bytes(string(P.𝑥.𝑛, base=16)),hex2bytes(string(P.𝑦.𝑛, base=16));dims=1)
+        ybin = reinterpret(UInt8, [hton(P.𝑦.𝑛)])
+        j = findfirst(x -> x != 0x00, ybin)
+        return cat(0x04,xbin[i:end],jbin[j:end];dims=1)
     end
 end
 
@@ -144,13 +148,13 @@ Returns true if Signature is valid for 𝑧 given 𝑃, false if not
 verify(𝑃::AbstractPoint, 𝑧::Integer, sig::Signature) -> Bool
 """
 function verify(𝑃::AbstractPoint,𝑧::Integer,sig::Signature)
-    𝑠⁻¹ = powermod(sig.𝑠, N - 2, N)
+    𝑠⁻¹ = powermod(sig.𝑠, N - 0x02, N)
     𝑢 = mod(𝑧 * 𝑠⁻¹, N)
     𝑣 = mod(sig.𝑟 * 𝑠⁻¹, N)
-    𝑅 = 𝑢 * G + 𝑣 * 𝑃
+    𝑅 = 𝑢 * ECC.G + 𝑣 * 𝑃
     return 𝑅.𝑥.𝑛 == sig.𝑟
 end
 
 # scep256k1 generator point
-G = S256Point(big"0x79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
-              big"0x483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8")
+G = S256Point(parse(UInt256,"79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",base=16),
+              parse(UInt256,"483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8",base=16))

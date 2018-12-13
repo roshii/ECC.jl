@@ -26,13 +26,16 @@
         b = ECC.FieldElement(21, 31)
         @test a+b == ECC.FieldElement(7, 31)
     end
-    @testset "Substraction" begin
+    @testset "Subtraction" begin
         a = ECC.FieldElement(29, 31)
         b = ECC.FieldElement(4, 31)
         @test a-b == ECC.FieldElement(25, 31)
         a = ECC.FieldElement(15, 31)
         b = ECC.FieldElement(30, 31)
         @test a-b == ECC.FieldElement(16, 31)
+        a = ECC.FieldElement(2, 31)
+        b = ECC.FieldElement(29, 31)
+        @test a-b == ECC.FieldElement(4, 31)
     end
     @testset "Multiplication" begin
         a = ECC.FieldElement(24, 31)
