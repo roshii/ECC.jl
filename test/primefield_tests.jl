@@ -50,13 +50,21 @@
         @test a^5 * b == ECC.FieldElement(16, 31)
     end
     @testset "Division" begin
-        a = ECC.FieldElement(3, 31)
-        b = ECC.FieldElement(24, 31)
-        @test a/b == ECC.FieldElement(4, 31)
-        a = ECC.FieldElement(17, 31)
-        @test a^-3 == ECC.FieldElement(29, 31)
-        a = ECC.FieldElement(4, 31)
-        b = ECC.FieldElement(11, 31)
-        @test a^-4*b == ECC.FieldElement(13, 31)
+        @testset "Base.Number" begin
+            a = ECC.FieldElement(3, 31)
+            b = ECC.FieldElement(24, 31)
+            @test a/b == ECC.FieldElement(4, 31)
+            a = ECC.FieldElement(17, 31)
+            @test a^-3 == ECC.FieldElement(29, 31)
+            a = ECC.FieldElement(4, 31)
+            b = ECC.FieldElement(11, 31)
+            @test a^-4*b == ECC.FieldElement(13, 31)
+        end
+        @testset "UInt256" begin
+            a = ECC.S256Element(parse(UInt256,"cd320a0da21e65fe9e2ea946383422afb2cfafc0bcef09b2bdac3d17b3faf5aa",base=16))
+            b = ECC.S256Element(parse(UInt256,"56039537bf435bdfb928d4e58cec6e34aa566c97f9ac943fdf6bd58aefad3a87",base=16))
+            want = ECC.S256Element(parse(UInt256,"a788c8c5318bd5a12be62f4c20cacb71771d73e73afcba96845da8dcb8dd0045",base=16))
+            @test a / b == want
+        end
     end
 end
