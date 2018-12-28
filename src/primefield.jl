@@ -86,6 +86,10 @@ function inv(𝑋::PrimeField)
     return typeof(𝑋)(𝑛, 𝑋.𝑝)
 end
 
+function div(𝑋₁::PrimeField,𝑋₂::PrimeField)
+    return 𝑋₁ / 𝑋₂
+end
+
 "Returns 𝑋₁/𝑋₂ using Fermat's Little Theorem"
 function /(𝑋₁::PrimeField,𝑋₂::PrimeField)
     if 𝑋₁.𝑝 != 𝑋₂.𝑝
