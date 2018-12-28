@@ -23,11 +23,19 @@ Convert Integer to bytes array
 int2bytes(x::Integer) -> Array{UInt8,1}
 """
 function int2bytes(x::Integer)
-    hex = string(x, base=16)
-    if mod(length(hex), 2) != 0
-        hex = string("0", hex)
+    result = reinterpret(UInt8, [hton(x)])
+    i = findfirst(x -> x != 0x00, result)
+    result[i:end]
+end
+
+function int2bytes(x::BigInt)
+    result = Array{UInt8}(undef, x.size * sizeof(eltype(x.d)))
+    unsafe_copyto!(convert(Ptr{eltype(x.d)}, pointer(result)), x.d, x.size)
+    if ENDIAN_BOM == 0x04030201
+        result = result[end:-1:1]
     end
-    return hex2bytes(hex)
+    i = findfirst(x -> x != 0x00, result)
+    result[i:end]
 end
 
 """

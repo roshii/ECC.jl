@@ -97,15 +97,16 @@ as second argument.
 'point2sec(P::T, compressed::Bool=true) where {T<:S256Point} -> Array{UInt8,1}'
 """
 function point2sec(P::T, compressed::Bool=true) where {T<:S256Point}
+    xbin = int2bytes(P.𝑥.𝑛)
     if compressed
         if mod(P.𝑦.𝑛, 2) == 0
-            indice = 0x02
+            prefix = 0x02
         else
-            indice = 0x03
+            prefix = 0x03
         end
-        return cat(indice,hex2bytes(string(P.𝑥.𝑛, base=16));dims=1)
+        return cat(prefix,xbin;dims=1)
     else
-        return cat(0x04,hex2bytes(string(P.𝑥.𝑛, base=16)),hex2bytes(string(P.𝑦.𝑛, base=16));dims=1)
+        return cat(0x04,xbin,int2bytes(P.𝑦.𝑛);dims=1)
     end
 end
 
