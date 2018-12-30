@@ -39,9 +39,9 @@
                 @test int2bytes(t[1]) == t[2]
             end
         end
-        @testset "bytes2int" begin
+        @testset "bytes2big" begin
             for t in tests
-                @test bytes2int(t[2]) == t[1]
+                @test bytes2big(t[2]) == t[1]
             end
         end
 end

@@ -18,7 +18,7 @@
 """
 
 """
-Convert Integer to bytes array
+Convert Integer to Array{UInt8}
 
 int2bytes(x::Integer) -> Array{UInt8,1}
 """
@@ -29,21 +29,54 @@ function int2bytes(x::Integer)
 end
 
 function int2bytes(x::BigInt)
-    result = Array{UInt8}(undef, x.size * sizeof(eltype(x.d)))
-    unsafe_copyto!(convert(Ptr{eltype(x.d)}, pointer(result)), x.d, x.size)
+    n_bytes_with_zeros = x.size * sizeof(Sys.WORD_SIZE)
+    uint8_ptr = convert(Ptr{UInt8}, x.d)
+    n_bytes_without_zeros = 1
+
     if ENDIAN_BOM == 0x04030201
-        result = result[end:-1:1]
+        # the minimum should be 1, else the result array will be of
+        # length 0
+        for i in n_bytes_with_zeros:-1:1
+            if unsafe_load(uint8_ptr, i) != 0x00
+                n_bytes_without_zeros = i
+                break
+            end
+        end
+
+        result = Array{UInt8}(undef, n_bytes_without_zeros)
+
+        for i in 1:n_bytes_without_zeros
+            @inbounds result[n_bytes_without_zeros + 1 - i] = unsafe_load(uint8_ptr, i)
+        end
+    else
+        for i in 1:n_bytes_with_zeros
+            if unsafe_load(uint8_ptr, i) != 0x00
+                n_bytes_without_zeros = i
+                break
+            end
+        end
+
+        result = Array{UInt8}(undef, n_bytes_without_zeros)
+
+        for i in 1:n_bytes_without_zeros
+            @inbounds result[i] = unsafe_load(uint8_ptr, i)
+        end
     end
-    i = findfirst(x -> x != 0x00, result)
-    result[i:end]
+    return result
 end
 
 """
-Convert bytes array to Integer
+Convert UInt8 Array to BigInt
 
-bytes2int(x::Array{UInt8,1}) -> BigInt
+bytes2big(x::Array{UInt8,1}) -> BigInt
 """
-function bytes2int(x::Array{UInt8,1})
-    hex = bytes2hex(x)
-    return parse(BigInt, hex, base=16)
+function bytes2big(x::Array{UInt8,1})
+    xsize = cld(length(x), Base.GMP.BITS_PER_LIMB / 8)
+    if ENDIAN_BOM == 0x04030201
+        reverse!(x)
+    end
+    result = Base.GMP.MPZ.realloc2(xsize * Base.GMP.BITS_PER_LIMB)
+    result.size = xsize
+    unsafe_copyto!(result.d, convert(Ptr{Base.GMP.Limb}, pointer(x)), xsize)
+    return result
 end
