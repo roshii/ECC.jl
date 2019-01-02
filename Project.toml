@@ -5,7 +5,7 @@ license = "GPLv3"
 authors = ["roshii <admin@brane.cc>"]
 description = "Elliptic Curve Cryptography"
 repository = "https://gitlab.com/braneproject/ECC.jl.git"
-version = "0.2.0"
+version = "0.2.1"
 
 [compat]
 julia = "1.0"
