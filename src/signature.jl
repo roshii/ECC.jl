@@ -86,6 +86,7 @@ function der2sig(signature_bin::AbstractArray{UInt8})
     end
     readbytes!(s, bytes, 1)
     slength = Int(bytes[1])
+    bytes = UInt8[]
     readbytes!(s, bytes, slength)
     s = bytes2hex(bytes)
     if length(signature_bin) != 6 + rlength + slength
