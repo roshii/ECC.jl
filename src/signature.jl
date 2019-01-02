@@ -1,5 +1,5 @@
 """
-    Copyright (C) 2018 Simon Castano
+    Copyright (C) 2018-2019 Simon Castano
 
     This file is part of ECC.jl
 
@@ -43,16 +43,16 @@ sig2der(x::Signature) -> Array{UInt8,1}
 function sig2der(x::Signature)
     rbin = int2bytes(x.𝑟)
     # if rbin has a high bit, add a 00
-    # if rbin[1] >= 128
-    #     rbin = pushfirst!(rbin, 0x00)
-    # end
+    if rbin[1] >= 128
+        rbin = pushfirst!(rbin, 0x00)
+    end
     result = cat([0x02], int2bytes(length(rbin)), rbin; dims=1)
     sbin = int2bytes(x.𝑠)
     # if sbin has a high bit, add a 00
-    # if sbin[1] >= 128
-    #     sbin = pushfirst!(sbin, 0x00)
-    # end
-    result = cat(result, [0x02], int2bytes(length(rbin)), sbin; dims=1)
+    if sbin[1] >= 128
+        sbin = pushfirst!(sbin, 0x00)
+    end
+    result = cat(result, [0x02], int2bytes(length(sbin)), sbin; dims=1)
     return cat([0x30], int2bytes(length(result)), result; dims=1)
 end
 

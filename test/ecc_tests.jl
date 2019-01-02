@@ -30,7 +30,8 @@
             testcases = (
                 (1, 2),
                 (rand(big.(0:big(2)^255)), rand(big.(0:big(2)^255))),
-                (rand(big.(0:big(2)^255)), rand(big.(0:big(2)^255))))
+                (rand(big.(0:big(2)^255)), rand(big.(0:big(2)^255))),
+                (rand(big.(0:big(2)^255)), rand(big.(0:big(2)^223))))
             for x in testcases
                 sig = Signature(x[1], x[2])
                 der = sig2der(sig)
