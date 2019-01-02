@@ -1,5 +1,5 @@
 """
-    Copyright (C) 2018 Simon Castano
+    Copyright (C) 2018-2019 Simon Castano
 
     This file is part of ECC.jl
 
@@ -117,12 +117,12 @@ sec2point(sec_bin::AbstractArray{UInt8}) -> S256Point
 """
 function sec2point(sec_bin::AbstractArray{UInt8})
     if sec_bin[1] == 4
-        𝑥 = bytes2big(sec_bin[2:33])
-        𝑦 = bytes2big(sec_bin[34:65])
+        𝑥 = bytes2int(sec_bin[2:33])
+        𝑦 = bytes2int(sec_bin[34:65])
         return S256Point(𝑥, 𝑦)
     end
     is_even = sec_bin[1] == 2
-    𝑥 = ECC.S256Element(bytes2big(sec_bin[2:end]))
+    𝑥 = ECC.S256Element(bytes2int(sec_bin[2:end]))
     α = 𝑥^3 + ECC.S256Element(ECC.B)
     β = sqrt(α)
     if mod(β.𝑛, 2) == 0

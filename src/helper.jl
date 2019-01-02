@@ -1,5 +1,5 @@
 """
-    Copyright (C) 2018 Simon Castano
+    Copyright (C) 2018-2019 Simon Castano
 
     This file is part of ECC.jl
 
@@ -66,11 +66,42 @@ function int2bytes(x::BigInt)
 end
 
 """
-Convert UInt8 Array to BigInt
+Convert UInt8 Array to Integers
 
 bytes2big(x::Array{UInt8,1}) -> BigInt
 """
+function bytes2int(x::Array{UInt8,1})
+    if length(x) > 8
+        bytes2big(x)
+    else
+        if Sys.WORD_SIZE == 64
+            T = Int64
+        elseif Sys.WORD_SIZE == 32
+            T = Int32
+        else
+            error("not implemented")
+        end
+        missing_zeros = div(Sys.WORD_SIZE, 8) -  length(x)
+        if missing_zeros > 0
+            for i in 1:missing_zeros
+                pushfirst!(x,0x00)
+            end
+        end
+        if ENDIAN_BOM == 0x04030201
+            reverse!(x)
+        end
+        return reinterpret(T, x)[1]
+    end
+end
+
 function bytes2big(x::Array{UInt8,1})
+    hex = bytes2hex(x)
+    return parse(BigInt, hex, base=16)
+end
+
+# TODO
+# Correct function errors
+function faster_bytes2big(x::Array{UInt8,1})
     xsize = cld(length(x), Base.GMP.BITS_PER_LIMB / 8)
     if ENDIAN_BOM == 0x04030201
         reverse!(x)
