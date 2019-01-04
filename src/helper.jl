@@ -74,13 +74,6 @@ function bytes2int(x::Array{UInt8,1})
     if length(x) > 8
         bytes2big(x)
     else
-        if Sys.WORD_SIZE == 64
-            T = Int64
-        elseif Sys.WORD_SIZE == 32
-            T = Int32
-        else
-            error("not implemented")
-        end
         missing_zeros = div(Sys.WORD_SIZE, 8) -  length(x)
         if missing_zeros > 0
             for i in 1:missing_zeros
@@ -90,7 +83,7 @@ function bytes2int(x::Array{UInt8,1})
         if ENDIAN_BOM == 0x04030201
             reverse!(x)
         end
-        return reinterpret(T, x)[1]
+        return reinterpret(Int, x)[1]
     end
 end
 
@@ -99,15 +92,35 @@ function bytes2big(x::Array{UInt8,1})
     return parse(BigInt, hex, base=16)
 end
 
-# TODO
-# Correct function errors
-function faster_bytes2big(x::Array{UInt8,1})
-    xsize = cld(length(x), Base.GMP.BITS_PER_LIMB / 8)
-    if ENDIAN_BOM == 0x04030201
-        reverse!(x)
-    end
-    result = Base.GMP.MPZ.realloc2(xsize * Base.GMP.BITS_PER_LIMB)
-    result.size = xsize
-    unsafe_copyto!(result.d, convert(Ptr{Base.GMP.Limb}, pointer(x)), xsize)
-    return result
-end
+# Alternative implementation
+
+# function bytes2int2(x::Array{UInt8,1})
+#     if isempty(x)
+#         return 0
+#     end
+#     if length(x) > div(Sys.WORD_SIZE, 8)
+#         T = BigInt
+#     else
+#         T = Int
+#     end
+#     result = zero(T)
+#     if ENDIAN_BOM == 0x01020304
+#         reverse!(x)
+#     end
+#     for c in x
+#         result <<= 8
+#         result += c
+#     end
+#     return result
+# end
+#
+# function faster_bytes2big(x::Array{UInt8,1})
+#     xsize = cld(length(x), Base.GMP.BITS_PER_LIMB / 8)
+#     if ENDIAN_BOM == 0x04030201
+#         reverse!(x)
+#     end
+#     result = Base.GMP.MPZ.realloc2(xsize * Base.GMP.BITS_PER_LIMB)
+#     result.size = xsize
+#     unsafe_copyto!(result.d, convert(Ptr{Base.GMP.Limb}, pointer(x)), xsize)
+#     return result
+# end
