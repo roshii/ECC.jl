@@ -1,5 +1,5 @@
 name = "ECC"
-uuid = "da8f3168-f3af-11e8-3bbf-539a9fd9f5f7"
+uuid = "a99b485a-c5c8-540e-ab00-7a7265134077"
 keywords = ["cryptography"]
 license = "MIT"
 authors = ["roshii <admin@brane.cc>"]
