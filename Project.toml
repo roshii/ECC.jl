@@ -1,11 +1,11 @@
 name = "ECC"
 uuid = "da8f3168-f3af-11e8-3bbf-539a9fd9f5f7"
 keywords = ["cryptography"]
-license = "GPLv3"
+license = "MIT"
 authors = ["roshii <admin@brane.cc>"]
 description = "Elliptic Curve Cryptography"
 repository = "https://gitlab.com/braneproject/ECC.jl.git"
-version = "0.2.1"
+version = "0.2.2"
 
 [compat]
 julia = "1.0"
