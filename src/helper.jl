@@ -1,14 +1,26 @@
 """
-Convert Integer to Array{UInt8}
+    Integer, Integer, Boolean -> Array{UInt8,1}
 
-int2bytes(x::Integer) -> Array{UInt8,1}
+Convert Integer to an Array{UInt8}
 """
-function int2bytes(x::Integer)
+function int2bytes(x::Integer, l::Integer=0, little_endian::Bool=false)
     result = reinterpret(UInt8, [hton(x)])
     i = findfirst(x -> x != 0x00, result)
-    result[i:end]
+    if l != 0
+        i = length(result) - l + 1
+    end
+    result = result[i:end]
+    if little_endian
+        reverse!(result)
+    end
+    return result
 end
 
+"""
+    BigInt -> Array{UInt8,1}
+
+Convert BigInt to an Array{UInt8}
+"""
 function int2bytes(x::BigInt)
     n_bytes_with_zeros = x.size * sizeof(Sys.WORD_SIZE)
     uint8_ptr = convert(Ptr{UInt8}, x.d)
@@ -47,27 +59,39 @@ function int2bytes(x::BigInt)
 end
 
 """
-Convert UInt8 Array to Integers
+    Array{UInt8,1}, Boolean -> Integer
 
-bytes2big(x::Array{UInt8,1}) -> BigInt
+Convert Array{UInt8,1} to an Integer
 """
-function bytes2int(x::Array{UInt8,1})
+function bytes2int(x::Array{UInt8,1}, little_endian::Bool=false)
     if length(x) > 8
         bytes2big(x)
     else
         missing_zeros = div(Sys.WORD_SIZE, 8) -  length(x)
         if missing_zeros > 0
-            for i in 1:missing_zeros
-                pushfirst!(x,0x00)
+            if little_endian
+                for i in 1:missing_zeros
+                    push!(x,0x00)
+                end
+            else
+                for i in 1:missing_zeros
+                    pushfirst!(x,0x00)
+                end
             end
         end
-        if ENDIAN_BOM == 0x04030201
+        if ENDIAN_BOM == 0x04030201 && little_endian
+        elseif ENDIAN_BOM == 0x04030201 || little_endian
             reverse!(x)
         end
         return reinterpret(Int, x)[1]
     end
 end
 
+"""
+    Array{UInt8,1} -> BigInt
+
+Convert Array{UInt8,1} to an Integer
+"""
 function bytes2big(x::Array{UInt8,1})
     hex = bytes2hex(x)
     return parse(BigInt, hex, base=16)
