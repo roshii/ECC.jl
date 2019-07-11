@@ -6,7 +6,7 @@ Elliptic Curve Cryptography in Julia
 
 ## Documentation
 
-https://braneproject.gitlab.io/ecc.jl
+https://braneproject.gitlab.io/ECC.jl
 
 ## Buy me a cup of coffee
 
